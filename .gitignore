@@ -3,3 +3,4 @@ venv
 __pycache__/
 currency-exchange-rate-background-LED-display-board.jpg
 ToDo.txt
+test.py

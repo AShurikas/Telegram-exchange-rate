@@ -53,7 +53,7 @@ def main():
     updater.idle()
 
 
-if status == 200:
+if status == 200 and __name__ == '__main__':
     main()
 
 
