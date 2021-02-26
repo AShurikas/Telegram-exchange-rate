@@ -3,7 +3,6 @@ import datetime
 import time
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-API_KEY_stock = '?access_key=4748196e0b1c991fde8c8bb9fe9bd7f5&format=1'
 API_KEY_telegram = '1509587112:AAFRUbN-AmxgnfigSvmt_t0yskNH1mJlE_Q'
 period = {'latest': 'latest'}
 source = 'https://api.exchangeratesapi.io/latest?base=USD'
@@ -20,19 +19,22 @@ def resp(income):
 
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
-    update.message.reply_text('Hi!')
+    update.message.reply_text('Hi! Type /help to see commands')
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_text('Help yourself')
+    update.message.reply_text(open('README.md', 'r', encoding='utf-8').read())
 
 
 def time_difference():
     with open('request.txt', 'r', encoding='utf-8') as f:
-        dt1 = datetime.datetime.strptime(f.readlines()[-1].strip(), '%H:%M:%S')
-        dt2 = datetime.datetime.now()
-        return (dt2 - dt1).seconds // 60
+        try:
+            dt1 = datetime.datetime.strptime(f.readlines()[-1].strip(), '%H:%M:%S')
+            dt2 = datetime.datetime.now()
+            return (dt2 - dt1).seconds // 60
+        except IndexError:
+            return 10
 
 
 def rates_list(update: Update, context: CallbackContext) -> None:
@@ -41,6 +43,9 @@ def rates_list(update: Update, context: CallbackContext) -> None:
         for i in r.json()['rates']:
             update.message.reply_text(i + " : " + str(round(r.json()['rates'][i], 2)))
         save_request(r.json()['rates'])
+    else:
+        for i in open('request.txt', 'r', encoding='utf-8').readlines()[:-1]:
+            update.message.reply_text(i[:4] + str(round(float(i[4:]), 2)))
 
 
 def run_bot(update: Update, context: CallbackContext) -> None:
@@ -63,7 +68,7 @@ def main():
 
 
 def save_request(currency):
-    with open('request.txt', 'a', encoding='utf8') as file:
+    with open('request.txt', 'w', encoding='utf8') as file:
         for i in currency:
             file.write(str(i) + ':' + str(currency[i]) + '\n')
         file.write(time.strftime('%X') + '\n')
