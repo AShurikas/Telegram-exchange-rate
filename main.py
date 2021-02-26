@@ -48,6 +48,20 @@ def rates_list(update: Update, context: CallbackContext) -> None:
             update.message.reply_text(i[:4] + str(round(float(i[4:]), 2)))
 
 
+def exchange(update: Update, context: CallbackContext) -> None:
+    try:
+        if len(update.message.text.split()) == 4:
+            update.message.reply_text(str(round(float(
+                update.message.text.split()[1][1:]) * float(
+                r.json()['rates'][update.message.text.split()[3].upper()]), 2)))
+        elif len(update.message.text.split()) == 5:
+            update.message.reply_text(str(round(float(
+                update.message.text.split()[1]) * float(
+                r.json()['rates'][update.message.text.split()[-1].upper()]), 2)))
+    except KeyError:
+        update.message.reply_text('Введены неправильные параметры.\nПовторите, пожалуйста.')
+
+
 def run_bot(update: Update, context: CallbackContext) -> None:
     response = resp(update.message.text.upper())
     update.message.reply_text(response)
@@ -62,6 +76,7 @@ def main():
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("list", rates_list))
+    dispatcher.add_handler(CommandHandler("exchange", exchange))
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, run_bot))
     updater.start_polling()
     updater.idle()
