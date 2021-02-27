@@ -2,8 +2,9 @@ import requests
 import datetime
 import time
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-API_KEY_telegram = '1509587112:AAFRUbN-AmxgnfigSvmt_t0yskNH1mJlE_Q'
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from BOT_CONFIG import API_KEY_telegram
+
 period = {'latest': 'latest'}
 source = 'https://api.exchangeratesapi.io/latest?base=USD'
 r = requests.get(source)
@@ -17,12 +18,12 @@ def resp(income):
         return 'Неверно введенный параметр'
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update: Update) -> None:
     """Send a message when the command /start is issued."""
     update.message.reply_text('Hi! Type /help to see commands')
 
 
-def help_command(update: Update, context: CallbackContext) -> None:
+def help_command(update: Update) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text(open('README.md', 'r', encoding='utf-8').read())
 
@@ -37,7 +38,7 @@ def time_difference():
             return 10
 
 
-def rates_list(update: Update, context: CallbackContext) -> None:
+def rates_list(update: Update) -> None:
     """Send a message when the command /list is issued."""
     if time_difference() >= 10:
         for i in r.json()['rates']:
@@ -48,11 +49,25 @@ def rates_list(update: Update, context: CallbackContext) -> None:
             update.message.reply_text(i[:4] + str(round(float(i[4:]), 2)))
 
 
-def run_bot(update: Update, context: CallbackContext) -> None:
+def exchange(update: Update) -> None:
+    try:
+        if len(update.message.text.split()) == 4:
+            update.message.reply_text(str(round(float(
+                update.message.text.split()[1][1:]) * float(
+                r.json()['rates'][update.message.text.split()[3].upper()]), 2)))
+        elif len(update.message.text.split()) == 5:
+            update.message.reply_text(str(round(float(
+                update.message.text.split()[1]) * float(
+                r.json()['rates'][update.message.text.split()[-1].upper()]), 2)))
+    except KeyError:
+        update.message.reply_text('Введены неправильные параметры.\nПовторите, пожалуйста.')
+
+
+def run_bot(update: Update) -> None:
     response = resp(update.message.text.upper())
     update.message.reply_text(response)
-    print(update.message.text)
-    print(response)
+    print(update.message.text)  # string for debugging (delete)
+    print(response)  # string for debugging (delete)
 
 
 def main():
@@ -62,6 +77,7 @@ def main():
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("list", rates_list))
+    dispatcher.add_handler(CommandHandler("exchange", exchange))
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, run_bot))
     updater.start_polling()
     updater.idle()
@@ -74,7 +90,5 @@ def save_request(currency):
         file.write(time.strftime('%X') + '\n')
 
 
-if status == 200 and __name__ == '__main__':
+if __name__ == '__main__':
     main()
-
-

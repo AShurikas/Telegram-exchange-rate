@@ -2,11 +2,12 @@
            Exchange rate bot Telegram
 Commands: 
 
-`/list - returns currency data`;
+/list - returns currency data;
 
-`<currency> - returns exchange rate selected currency to USD`;
+'currency code' - returns exchange rate selected currency to USD;
 
-`/exchange $10 to CAD or /exchange 10 USD to CAD` - converts to the second currency with two
+/exchange $10 to CAD or 
+/exchange 10 USD to CAD - converts to the second currency with two
 decimal precision and return.
 
 
