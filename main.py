@@ -4,9 +4,11 @@ import time
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from BOT_CONFIG import API_KEY_telegram
+from matplotlib import pyplot as plt
 
 period = {'latest': 'latest'}
 source = 'https://api.exchangeratesapi.io/latest?base=USD'
+source_for_history = 'https://api.exchangeratesapi.io/history?'
 r = requests.get(source)
 status = r.status_code
 
@@ -49,7 +51,33 @@ def rates_list(update: Update, context: CallbackContext) -> None:
             update.message.reply_text(i[:4] + str(round(float(i[4:]), 2)))
 
 
+def history(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /history is issued."""
+    period_days = int(update.message.text.split()[3])
+    rate_index = update.message.text.split()[1][4:7]
+    now_date = datetime.datetime.now()
+    target_date = (now_date - datetime.timedelta(days=period_days)).strftime('%Y-%m-%d')
+    r = requests.get(source_for_history
+                     + 'start_at=' + target_date
+                     + '&end_at=' + now_date.strftime('%Y-%m-%d')
+                     + '&base=USD&symbols=' + rate_index)
+    dates = [i for i in r.json()['rates']]
+    indexes = []
+    for i in dates:
+        indexes.append(r.json()['rates'][i][rate_index])
+    graph(dates, indexes, rate_index)
+
+
+def graph(dates, indexes, rate_index):
+    file_name = 'Graph' + '-' + str(dates[0]) + '_' + str(dates[-1] + rate_index) + '.png'
+    plt.plot(dates, indexes)
+    plt.xlabel('Dates')
+    plt.ylabel('Rates')
+    plt.savefig(file_name)
+    
+
 def exchange(update: Update, context: CallbackContext) -> None:
+    """Send a message when the command /exchange is issued."""
     try:
         if len(update.message.text.split()) == 4:
             update.message.reply_text(str(round(float(
@@ -78,6 +106,7 @@ def main():
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(CommandHandler("list", rates_list))
     dispatcher.add_handler(CommandHandler("exchange", exchange))
+    dispatcher.add_handler(CommandHandler("history", history))
     dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, run_bot))
     updater.start_polling()
     updater.idle()
