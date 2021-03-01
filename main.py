@@ -2,7 +2,7 @@ import requests
 import datetime
 import time
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from BOT_CONFIG import API_KEY_telegram
 
 period = {'latest': 'latest'}
@@ -18,12 +18,12 @@ def resp(income):
         return 'Неверно введенный параметр'
 
 
-def start(update: Update) -> None:
+def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     update.message.reply_text('Hi! Type /help to see commands')
 
 
-def help_command(update: Update) -> None:
+def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     update.message.reply_text(open('README.md', 'r', encoding='utf-8').read())
 
@@ -38,7 +38,7 @@ def time_difference():
             return 10
 
 
-def rates_list(update: Update) -> None:
+def rates_list(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /list is issued."""
     if time_difference() >= 10:
         for i in r.json()['rates']:
@@ -49,7 +49,7 @@ def rates_list(update: Update) -> None:
             update.message.reply_text(i[:4] + str(round(float(i[4:]), 2)))
 
 
-def exchange(update: Update) -> None:
+def exchange(update: Update, context: CallbackContext) -> None:
     try:
         if len(update.message.text.split()) == 4:
             update.message.reply_text(str(round(float(
@@ -63,7 +63,7 @@ def exchange(update: Update) -> None:
         update.message.reply_text('Введены неправильные параметры.\nПовторите, пожалуйста.')
 
 
-def run_bot(update: Update) -> None:
+def run_bot(update: Update, context: CallbackContext) -> None:
     response = resp(update.message.text.upper())
     update.message.reply_text(response)
     print(update.message.text)  # string for debugging (delete)
