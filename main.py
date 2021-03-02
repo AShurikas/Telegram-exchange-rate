@@ -54,7 +54,7 @@ def rates_list(update: Update, context: CallbackContext) -> None:
 def history(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /history is issued."""
     period_days = int(update.message.text.split()[3])
-    rate_index = update.message.text.split()[1][4:7]
+    rate_index = update.message.text.split()[1][4:7].upper()
     now_date = datetime.datetime.now()
     target_date = (now_date - datetime.timedelta(days=period_days)).strftime('%Y-%m-%d')
     req = requests.get(source_for_history
@@ -92,8 +92,6 @@ def exchange(update: Update, context: CallbackContext) -> None:
 def run_bot(update: Update, context: CallbackContext) -> None:
     response = resp(update.message.text.upper())
     update.message.reply_text(response)
-    print(update.message.text)  # string for debugging (delete)
-    print(response)  # string for debugging (delete)
 
 
 def main():
