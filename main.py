@@ -70,6 +70,7 @@ def history(update: Update, context: CallbackContext) -> None:
     plt.xlabel('Dates')
     plt.ylabel('Rates')
     plt.savefig(file_name)
+    plt.close()
     update.message.reply_photo(photo=open(file_name, 'rb'))
     
 
