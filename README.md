@@ -9,6 +9,7 @@ Commands:
 /exchange $10 to CAD or 
 /exchange 10 USD to CAD - converts to the second currency with two
 decimal precision and return.
+
 /history USD/'currency code' for 7 days - return an image graph chart which shows the exchange rate of the selected currency to USD for the last 7 days.
 
 
