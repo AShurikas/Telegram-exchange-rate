@@ -1,7 +1,7 @@
 import requests
 import datetime
 import time
-from telegram import Update, InputMediaPhoto
+from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from BOT_CONFIG import API_KEY_telegram
 from matplotlib import pyplot as plt
@@ -31,13 +31,13 @@ def help_command(update: Update, context: CallbackContext) -> None:
 
 
 def time_difference():
-    with open('request.txt', 'r', encoding='utf-8') as f:
-        try:
+    try:
+        with open('request.txt', 'r', encoding='utf-8') as f:
             dt1 = datetime.datetime.strptime(f.readlines()[-1].strip(), '%H:%M:%S')
             dt2 = datetime.datetime.now()
             return (dt2 - dt1).seconds // 60
-        except IndexError:
-            return 10
+    except (IndexError, FileNotFoundError):
+        return 10
 
 
 def rates_list(update: Update, context: CallbackContext) -> None:
@@ -57,14 +57,14 @@ def history(update: Update, context: CallbackContext) -> None:
     rate_index = update.message.text.split()[1][4:7]
     now_date = datetime.datetime.now()
     target_date = (now_date - datetime.timedelta(days=period_days)).strftime('%Y-%m-%d')
-    r = requests.get(source_for_history
-                     + 'start_at=' + target_date
-                     + '&end_at=' + now_date.strftime('%Y-%m-%d')
-                     + '&base=USD&symbols=' + rate_index)
-    dates = [i for i in r.json()['rates']]
+    req = requests.get(source_for_history
+                       + 'start_at=' + target_date
+                       + '&end_at=' + now_date.strftime('%Y-%m-%d')
+                       + '&base=USD&symbols=' + rate_index)
+    dates = [i for i in req.json()['rates']]
     indexes = []
     for i in dates:
-        indexes.append(r.json()['rates'][i][rate_index])
+        indexes.append(req.json()['rates'][i][rate_index])
     file_name = 'Graph' + '-' + str(dates[0]) + '_' + str(dates[-1] + rate_index) + '.png'
     plt.plot(sorted(dates), sorted(indexes))
     plt.xlabel('Dates')
