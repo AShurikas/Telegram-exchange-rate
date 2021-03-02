@@ -1,7 +1,7 @@
 import requests
 import datetime
 import time
-from telegram import Update
+from telegram import Update, InputMediaPhoto
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from BOT_CONFIG import API_KEY_telegram
 from matplotlib import pyplot as plt
@@ -65,15 +65,12 @@ def history(update: Update, context: CallbackContext) -> None:
     indexes = []
     for i in dates:
         indexes.append(r.json()['rates'][i][rate_index])
-    graph(dates, indexes, rate_index)
-
-
-def graph(dates, indexes, rate_index):
     file_name = 'Graph' + '-' + str(dates[0]) + '_' + str(dates[-1] + rate_index) + '.png'
-    plt.plot(dates, indexes)
+    plt.plot(sorted(dates), sorted(indexes))
     plt.xlabel('Dates')
     plt.ylabel('Rates')
     plt.savefig(file_name)
+    update.message.reply_photo(photo=open(file_name, 'rb'))
     
 
 def exchange(update: Update, context: CallbackContext) -> None:
