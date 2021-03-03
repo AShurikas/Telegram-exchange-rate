@@ -15,7 +15,7 @@ status = r.status_code
 
 def resp(income):
     try:
-        return r.json()['rates'][income]
+        return round(r.json()['rates'][income], 2)
     except KeyError:
         return 'Неверно введенный параметр'
 
