@@ -22,7 +22,7 @@ def resp(income):
 
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
-    update.message.reply_text('Hi! Type /help to see commands')
+    update.message.reply_text(f'Hello {update.effective_user.first_name}')
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
